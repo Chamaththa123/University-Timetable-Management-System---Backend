@@ -8,6 +8,8 @@ const PORT = process.env.PORT || 8000;
 
 app.use(express.json());
 
+app.use("/api/users" , require('./route/userRoute'));
+
 //connect db
 connectDB();
 
