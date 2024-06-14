@@ -5,11 +5,6 @@ const jwt = require("jsonwebtoken");
 //function to register user
 async function registerUser(userData) {
   try {
-    const existingUser = await User.findOne({ email: userData.email });
-
-    if (existingUser) {
-      throw new error("user already exists");
-    }
 
     const hashedPassword = await bcrypt.hash(userData.password, 10);
 
@@ -33,34 +28,25 @@ async function registerUser(userData) {
 async function loginUser(email, password) {
   try {
     const user = await User.findOne({ email });
-
     if (!user) {
-      res.status(404).json({ message: "user not found" });
+      throw new Error("User not found");
     }
 
-    const isPasswordValid = await bcrypt.compare(passowrd, user.password);
-
+    const isPasswordValid = await bcrypt.compare(password, user.password);
     if (!isPasswordValid) {
-      res.status(401).json({ message: "password is not valid" });
+      throw new Error("Invalid password");
     }
 
-    //generate jwt token
+    // Generate JWT token
     const token = jwt.sign(
-      {
-        userId: user.id,
-        firstName: user.firstName,
-        lastName: user.lastName,
-        email: user.email,
-        role: user.role,
-        createdDate: user.createdDate,
-      },
+      { userId: user._id, role: user.role },
       "secret_key",
       { expiresIn: "1h" }
     );
 
     return token;
   } catch (error) {
-    res.status(500).json({ message: "error in user service" }, error);
+    throw error;
   }
 }
 

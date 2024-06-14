@@ -19,6 +19,10 @@ const userschema = new mongoose.Schema({
     enum: [0, 1, 2],
     required: true,
   },
+  password: {
+    type: String,
+    required: true,
+  },
   createdDate:{
     type: Date,
     default: Date.now()
