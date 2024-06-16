@@ -124,13 +124,24 @@ async function getCourseById(req, res) {
 // Function to assign a faculty to a course
 async function assignFaculty(req, res) {
   try {
-    const { courseId, facultyId, position } = req.body;
-    const result = await courseService.assignFaculty(
-      courseId,
-      facultyId,
-      position
+    const { courseId } = req.params;
+    const { facultyId, position } = req.body;
+
+    const course = await Course.findById({_id:courseId});
+
+    const isFacultyAlreadyAssigned = course.facultyMember.some(
+      (faculty) => faculty.faculty.toString() === facultyId
     );
-    res.status(200).json(result.message);
+
+    if (isFacultyAlreadyAssigned) {
+      return res.status(400).json({ message: "Faculty member is already assigned to this course" });
+    }
+
+    const result = await courseService.assignFaculty(courseId, facultyId, position);
+
+    res
+      .status(200)
+      .json({ message: "Faculty member is assigned successfully",result });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -140,8 +151,18 @@ async function assignFaculty(req, res) {
 async function removeFaculty(req, res) {
   try {
     const { courseId, facultyId } = req.params;
+
+    const course = await Course.findOne({
+      _id: courseId,
+      "facultyMember.faculty": facultyId,
+    });
+
+    if (!course) {
+      return res.status(404).json({ message: "Faculty member not found in the course" });
+    }
+
     const result = await courseService.removeFaculty(courseId, facultyId);
-    res.status(200).json(result.message);
+    res.status(200).json({ message: "Faculty member is removed successfully",result });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }

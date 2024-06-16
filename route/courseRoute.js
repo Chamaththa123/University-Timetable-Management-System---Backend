@@ -14,8 +14,9 @@ const {
 router.post("/", createCourse);
 router.get("/", getCourses);
 router.get("/:courseId", getCourseById);
-// router.post("/assign-faculty", verifyToken, AdminAccess, assignFaculty);
-// router.put("/:courseId/:facultyId", verifyToken, AdminAccess, removeFaculty);
 router.delete("/:courseId", deleteCourse);
 router.put("/:courseId", updateCourse);
+router.post("/assign-faculty/:courseId", assignFaculty);
+router.put("/:courseId/:facultyId",  removeFaculty);
+
 module.exports = router;

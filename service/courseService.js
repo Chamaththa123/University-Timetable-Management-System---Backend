@@ -76,25 +76,13 @@ async function getCourseById(courseId) {
 // Function to assign a faculty members to a course
 async function assignFaculty(courseId, facultyId, position) {
   try {
-    const faculty = await User.findById(facultyId);
-    if (faculty && faculty.role !== 1) {
-      throw new Error("Only Faculty member can be assigned to courses");
-    }
 
-    const course = await Course.findOne({
-      _id: courseId,
-      "faculties.faculty": facultyId,
-    });
-    if (course) {
-      throw new Error("Faculty member is already assigned to this course");
-    }
-
-    await Course.findByIdAndUpdate(
+    const assignFaculty = await Course.findByIdAndUpdate(
       courseId,
-      { $addToSet: { faculties: { faculty: facultyId, position } } },
+      { $addToSet: { facultyMember: { faculty: facultyId, position } } },
       { new: true }
     );
-    return { message: "Faculty member is assigned successfully" };
+    return assignFaculty;
   } catch (error) {
     throw error;
   }
@@ -103,21 +91,13 @@ async function assignFaculty(courseId, facultyId, position) {
 // Function to remove a faculty member from a course
 async function removeFaculty(courseId, facultyId) {
   try {
-    // Check if the faculty member exists in the course
-    const course = await Course.findOne({
-      _id: courseId,
-      "faculties.faculty": facultyId,
-    });
-    if (!course) {
-      throw new Error("Faculty member not found in the course");
-    }
 
-    await Course.findByIdAndUpdate(
+    const removeFaculty = await Course.findByIdAndUpdate(
       courseId,
-      { $pull: { faculties: { faculty: facultyId } } },
+      { $pull: { facultyMember: { faculty: facultyId } } },
       { new: true }
     );
-    return { message: "Faculty member is removed successfully" };
+    return removeFaculty;
   } catch (error) {
     throw error;
   }
