@@ -16,19 +16,20 @@ const facultyMembers = new mongoose.Schema({
 
 const courseSchema = new mongoose.Schema({
   course_name: {
-    type: string,
+    type: String,
     required: true,
   },
   course_code: {
-    type: string,
+    type: String,
     required: true,
+    unique: true,
   },
   description: {
-    type: string,
+    type: String,
     required: true,
   },
   credit: {
-    type: string,
+    type: Number,
     required: true,
   },
   facultyMember: [facultyMembers],
@@ -37,7 +38,7 @@ const courseSchema = new mongoose.Schema({
     default: Date.now(),
   },
   updated_at: {
-    type: string,
+    type: Date,
     default: Date.now(),
   },
 });

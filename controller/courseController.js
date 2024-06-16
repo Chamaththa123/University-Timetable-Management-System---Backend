@@ -11,19 +11,23 @@ async function createCourse(req, res) {
     } else if (!courseData.course_code) {
       return res.status(400).json({ message: "Course code is required" });
     } else if (!courseData.description) {
-      return res.status(400).json({ message: "Course description is required" });
+      return res
+        .status(400)
+        .json({ message: "Course description is required" });
     } else if (!courseData.credit) {
       return res.status(400).json({ message: "Course credit is required" });
     }
 
-    const existingCourse = await Course.findOne({course_code : courseData.course_code});
+    const existingCourse = await Course.findOne({
+      course_code: courseData.course_code,
+    });
 
-    if(existingCourse){
-        return res.status(400).json({ message: "Course code already exists" });
+    if (existingCourse) {
+      return res.status(400).json({ message: "Course code already exists" });
     }
-    
+
     const course = await courseService.createCourse(courseData);
-    res.status(201).json(course);
+    res.status(201).json({ course, message: "Course created successfully" });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -44,11 +48,39 @@ async function updateCourse(req, res) {
   try {
     const { courseId } = req.params;
     const updatedCourseData = req.body;
+
+    if (!updatedCourseData.course_name) {
+      return res.status(400).json({ message: "Course name is required" });
+    } else if (!updatedCourseData.course_code) {
+      return res.status(400).json({ message: "Course code is required" });
+    } else if (!updatedCourseData.description) {
+      return res
+        .status(400)
+        .json({ message: "Course description is required" });
+    } else if (!updatedCourseData.credit) {
+      return res.status(400).json({ message: "Course credit is required" });
+    }
+
+    const checkId = await Course.findOne({ _id: courseId });
+    const checkCode = await Course.findOne({
+      course_code: updatedCourseData.updatedCourseData,
+    });
+
+    if (!checkId) {
+      return res.status(404).json({ message: "Course not found" });
+    }
+
+    if (!checkCode) {
+      return res.status(400).json({ message: "Course code already exists" });
+    }
+
+    updatedCourseData.updated_at = new Date();
+
     const result = await courseService.updateCourse(
       courseId,
       updatedCourseData
     );
-    res.status(200).json(result.message);
+    res.status(200).json({ message: "Course updated successfully", result });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -58,8 +90,14 @@ async function updateCourse(req, res) {
 async function deleteCourse(req, res) {
   try {
     const { courseId } = req.params;
-    const result = await courseService.deleteCourse(courseId);
-    res.status(200).json(result.message);
+
+    const checkCourse = await Course.findOne({ _id: courseId });
+
+    if (!checkCourse) {
+      return res.status(404).json({ message: "Course not found" });
+    }
+    await courseService.deleteCourse(courseId);
+    res.status(200).json({ message: "Course deleted successfully" });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -69,9 +107,14 @@ async function deleteCourse(req, res) {
 async function getCourseById(req, res) {
   try {
     const { courseId } = req.params;
-    const { userId, role } = req.user;
 
-    const course = await courseService.getCourseById(courseId, userId, role);
+    const checkCourse = await Course.findOne({ _id: courseId });
+
+    if (!checkCourse) {
+      return res.status(404).json({ message: "Course not found" });
+    }
+
+    const course = await courseService.getCourseById(courseId);
     res.status(200).json(course);
   } catch (error) {
     res.status(500).json({ error: error.message });
